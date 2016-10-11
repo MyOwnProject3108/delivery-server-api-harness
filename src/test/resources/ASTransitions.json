@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "New": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "Transfer In Progress": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "Transfer Complete": {
+      "type": "array",
+      "items": {}
+    }
+  },
+  "required": [
+    "New",
+    "Transfer In Progress",
+    "Transfer Complete"
+  ]
+}

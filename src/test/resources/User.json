@@ -1,0 +1,351 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "user": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "type": "string",
+          "id": "_id"
+        },
+        "agency": {
+          "type": "object",
+          "properties": {
+            "_id": {
+              "type": "string",
+              "id": "_id"
+            },
+            "name": {
+              "type": "string",
+              "id": "name"
+            },
+            "country": {
+              "type": "string",
+              "id": "country"
+            }
+          },
+          "id": "agency",
+          "required": [
+            "_id",
+            "name",
+            "country"
+          ]
+        },
+        "_cm": {
+          "type": "object",
+          "properties": {
+            "common": {
+              "type": "object",
+              "properties": {
+                "email": {
+                  "type": "string",
+                  "id": "email"
+                },
+                "language": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "id": "language"
+                },
+                "firstName": {
+                  "type": "string",
+                  "id": "firstName"
+                },
+                "lastName": {
+                  "type": "string",
+                  "id": "lastName"
+                },
+                "fullName": {
+                  "type": "string",
+                  "id": "fullName"
+                },
+                "passwordNeverExpires": {
+                  "type": "boolean",
+                  "id": "passwordNeverExpires"
+                }
+              },
+              "id": "common",
+              "required": [
+                "email",
+                "language",
+                "firstName",
+                "lastName"
+              ]
+            },
+            "view": {
+              "type": "object",
+              "properties": {
+                "access": {
+                  "type": "object",
+                  "properties": {
+                    "library": {
+                      "type": "boolean",
+                      "id": "library"
+                    },
+                    "ordering": {
+                      "type": "boolean",
+                      "id": "ordering"
+                    },
+                    "folders": {
+                      "type": "boolean",
+                      "id": "folders"
+                    },
+                    "adpath": {
+                      "type": "boolean",
+                      "id": "adpath",
+                      "enum": [true]
+                    },
+                    "adkits": {
+                      "type": "boolean",
+                      "id": "adkits"
+                    },
+                    "approvals": {
+                      "type": "boolean",
+                      "id": "approvals"
+                    },
+                    "annotations": {
+                      "type": "boolean",
+                      "id": "annotations"
+                    },
+                    "presentations": {
+                      "type": "boolean",
+                      "id": "presentations"
+                    },
+                    "dashboard": {
+                      "type": "boolean",
+                      "id": "dashboard"
+                    },
+                    "ingest": {
+                      "type": "boolean",
+                      "id": "ingest"
+                    }
+                  },
+                  "id": "access"
+                }
+              },
+              "id": "view",
+              "required": [
+                "access"
+              ]
+            }
+          },
+          "id": "_cm",
+          "required": [
+            "common",
+            "view"
+          ]
+        },
+        "roles": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "_id": {
+                "type": "string",
+                "id": "_id"
+              },
+              "_cm": {
+                "type": "object",
+                "properties": {
+                  "common": {
+                    "type": "object",
+                    "properties": {},
+                    "id": "common"
+                  }
+                },
+                "id": "_cm",
+                "required": [
+                  "common"
+                ]
+              },
+              "group": {
+                "type": "string",
+                "id": "group"
+              },
+              "_documentType": {
+                "type": "string",
+                "id": "_documentType"
+              },
+              "_version": {
+                "type": "integer",
+                "id": "_version"
+              },
+              "name": {
+                "type": "string",
+                "id": "name"
+              }
+            },
+            "id": "0",
+            "required": [
+              "_id",
+              "_cm",
+              "group",
+              "_documentType",
+              "_version",
+              "name"
+            ]
+          },
+          "id": "roles"
+        },
+        "_permissions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "id": "_permissions"
+        },
+        "_created": {
+          "type": "string",
+          "id": "_created"
+        },
+        "_modified": {
+          "type": "string",
+          "id": "_modified"
+        },
+        "passwordExpirationDate": {
+          "type": "string",
+          "id": "passwordExpirationDate"
+        },
+        "_parents": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "id": "_parents"
+        },
+        "_subtype": {
+          "type": "string",
+          "id": "_subtype"
+        },
+        "_version": {
+          "type": "integer",
+          "id": "_version"
+        },
+        "createdBy": {
+          "type": "object",
+          "properties": {
+            "_id": {
+              "type": "string",
+              "id": "_id"
+            },
+            "email": {
+              "type": "string",
+              "id": "email"
+            }
+          },
+          "id": "createdBy",
+          "required": [
+            "_id",
+            "email"
+          ]
+        },
+        "owner": {
+          "type": "string",
+          "id": "owner"
+        },
+        "registered": {
+          "type": "boolean",
+          "id": "registered"
+        },
+        "_documentType": {
+          "type": "string",
+          "id": "_documentType"
+        }
+      },
+      "id": "user",
+      "required": [
+        "_id",
+        "agency",
+        "_cm",
+        "roles",
+        "_permissions",
+        "_created",
+        "_modified",
+        "passwordExpirationDate",
+        "_parents",
+        "_subtype",
+        "_version",
+        "createdBy",
+        "owner",
+        "registered",
+        "_documentType"
+      ]
+    },
+    "bu": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "type": "string",
+          "id": "_id"
+        },
+        "_cm": {
+          "type": "object",
+          "properties": {
+            "view": {
+              "type": "object",
+              "properties": {
+                "brandingSB": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "id": "brandingSB"
+                }
+              },
+              "id": "view",
+              "required": [
+                "brandingSB"
+              ]
+            },
+            "common": {
+              "type": "object",
+              "properties": {
+                "agencyType": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "id": "agencyType"
+                },
+                "labels": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "id": "labels"
+                },
+                "storageId": {
+                  "type": "string",
+                  "id": "storageId"
+                }
+              },
+              "id": "common",
+              "required": [
+                "agencyType",
+                "labels",
+                "storageId"
+              ]
+            }
+          },
+          "id": "_cm",
+          "required": [
+            "view",
+            "common"
+          ]
+        }
+      },
+      "id": "bu",
+      "required": [
+        "_id",
+        "_cm"
+      ]
+    }
+  },
+  "id": "/",
+  "required": [
+    "user",
+    "bu"
+  ]
+}

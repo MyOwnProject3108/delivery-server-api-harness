@@ -1,0 +1,26 @@
+apply plugin: 'java'
+
+repositories {
+    mavenCentral()
+}
+dependencies {
+    compile 'org.testng:testng:6.9.10'
+    compile 'org.hamcrest:java-hamcrest:2.0.0.0'
+    compile 'commons-net:commons-net:3.5'
+    compile 'com.google.code.gson:gson:2.7'
+    compile 'ru.lanwen.verbalregex:java-verbal-expressions:1.4'
+    compile 'ch.qos.logback:logback-classic:1.1.7'
+    compile 'io.rest-assured:rest-assured:3.0.1'
+    compile 'io.rest-assured:json-schema-validator:3.0.1'
+    compile 'com.fasterxml.jackson.core:jackson-databind:2.8.3'
+}
+
+task testAPI (type : Test) {
+    useTestNG() {
+        suites 'src/test/resources/testng.xml'
+    }
+    if (project.hasProperty("target")) {
+        systemProperty 'target', "${target}"
+    }
+}
+
