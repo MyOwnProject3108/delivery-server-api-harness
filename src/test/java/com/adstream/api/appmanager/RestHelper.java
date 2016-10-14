@@ -47,12 +47,12 @@ public class RestHelper {
                 .put(path);
     }
 
-    private Response sendPostRequest(String xUserId, String path, BodyBuilder body) {
-        RequestSpecification partialReq = given().
-                baseUri(baseURI).port(port).
-                contentType("application/json");
-        return setUserHeader(partialReq, xUserId)
-                .body(body)
+    private Response sendPostRequest(String xUserId, String path, String orderId) {
+        return given()
+                .baseUri(baseURI).port(port)
+                .header("subjectId", xUserId)
+                .header("orderId", orderId)
+                .header("ActivityType", "orderPlaced")
                 .when()
                 .post(path);
     }
@@ -72,5 +72,13 @@ public class RestHelper {
     //GET /api/core/v1/user/{userId} -- Retrieve user details
     public Response getUserDetails(String xUserId, String userId) throws IOException {
         return sendGetRequest(xUserId, "/api/core/v1/user/" + userId);
+    }
+
+    public Response getOrderDetails(String xUserId, String orderId) throws IOException {
+        return sendGetRequest(xUserId, "/api/traffic/v1/order/" + orderId);
+    }
+
+    public Response createActivity(String xUserId, String orderId) throws IOException {
+        return sendPostRequest(xUserId, "/admin/activities/order", orderId);
     }
 }
