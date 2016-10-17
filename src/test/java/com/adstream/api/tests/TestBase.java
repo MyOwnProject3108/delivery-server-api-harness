@@ -1,6 +1,5 @@
 package com.adstream.api.tests;
 
-import com.github.tomakehurst.wiremock.WireMockServer;
 import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeSuite;
 import com.adstream.api.appmanager.ApplicationManager;
@@ -13,18 +12,21 @@ import java.io.IOException;
 public class TestBase {
 
   protected static final ApplicationManager app = new ApplicationManager();
-  protected static final WireMockServer wms = new WireMockServer();
-
+  //public WireMockServer wms = new WireMockServer();
 
   @BeforeSuite
   public void setUp() throws Exception {
     app.init();
-    wms.start();
+
+   // wms.start();
+
+
   }
 
   @AfterSuite(alwaysRun = true)
   public void tearDown() throws IOException {
     //wms.stop();
+    //app.stop();
   }
 
 }

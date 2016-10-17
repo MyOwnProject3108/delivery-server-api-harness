@@ -47,16 +47,6 @@ public class RestHelper {
                 .put(path);
     }
 
-    private Response sendPostRequest(String xUserId, String path, String orderId) {
-        return given()
-                .baseUri(baseURI).port(port)
-                .header("subjectId", xUserId)
-                .header("orderId", orderId)
-                .header("ActivityType", "orderPlaced")
-                .when()
-                .post(path);
-    }
-
     //AdditionalServices
     //GET /api/traffic/v1/additionalService/transitions -- Get map of transitions to display in UI
     public Response getASTransitions(String xUserId) throws IOException {
@@ -78,7 +68,9 @@ public class RestHelper {
         return sendGetRequest(xUserId, "/api/traffic/v1/order/" + orderId);
     }
 
-    public Response createActivity(String xUserId, String orderId) throws IOException {
-        return sendPostRequest(xUserId, "/admin/activities/order", orderId);
+    public Response getOrderItemDetails(String xUserId, String orderItemId) throws IOException {
+        return sendGetRequest(xUserId, "/api/traffic/v1/orderitem/" + orderItemId);
     }
+
+
 }
