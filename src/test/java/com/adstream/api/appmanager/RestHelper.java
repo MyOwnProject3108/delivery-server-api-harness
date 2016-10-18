@@ -15,10 +15,8 @@ import static io.restassured.RestAssured.port;
  * Created by natla on 26/07/2016.
  */
 public class RestHelper {
-    private ApplicationManager app;
 
     public RestHelper(ApplicationManager app) {
-        this.app = app;
         baseURI = app.getProperty("baseURI");
         port = new Integer(app.getProperty("ds_port"));
     }
@@ -47,6 +45,16 @@ public class RestHelper {
                 .put(path);
     }
 
+    private Response sendPostRequest(String xUserId, String path, BodyBuilder body) {
+        RequestSpecification partialReq = given().
+                baseUri(baseURI).port(port).
+                contentType("application/json");
+        return setUserHeader(partialReq, xUserId)
+                .body(body)
+                .when()
+                .post(path);
+    }
+
     //AdditionalServices
     //GET /api/traffic/v1/additionalService/transitions -- Get map of transitions to display in UI
     public Response getASTransitions(String xUserId) throws IOException {
@@ -71,6 +79,5 @@ public class RestHelper {
     public Response getOrderItemDetails(String xUserId, String orderItemId) throws IOException {
         return sendGetRequest(xUserId, "/api/traffic/v1/orderitem/" + orderItemId);
     }
-
 
 }

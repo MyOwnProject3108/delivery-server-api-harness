@@ -13,9 +13,9 @@ import java.util.Properties;
 public class ApplicationManager {
     private final Properties properties;
     private RestHelper restHelper;
-    private PapiHelper papiHelper;
     private MockHelper mockHelper;
-    //private WireMockServer wms;
+    private PapiHelper papiHelper;
+
 
     public ApplicationManager() {
         properties = new Properties();
@@ -29,12 +29,6 @@ public class ApplicationManager {
     public String getProperty(String key) {
           return properties.getProperty(key);
       }
-
-//    public void stop() {
-//        if (wms != null) {
-//            wms.stop();
-//        }
-//    }
 
     public RestHelper rest() {
         if (restHelper == null) {
@@ -50,19 +44,10 @@ public class ApplicationManager {
         return mockHelper;
     }
 
-//    public WireMockServer getWms() {
-//        if (wms == null) {
-//            wms = new WireMockServer();
-//            wms.start();
-//        }
-//        return wms;
-//    }
-
     public PapiHelper papi() {
         if (papiHelper == null) {
             papiHelper = new PapiHelper(this);
         }
         return papiHelper;
     }
-
 }
