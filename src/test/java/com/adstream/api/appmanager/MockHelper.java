@@ -1,12 +1,10 @@
 package com.adstream.api.appmanager;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
-import com.github.tomakehurst.wiremock.client.WireMock;
 import io.restassured.response.Response;
 
 import java.io.IOException;
 
-import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.options;
 import static io.restassured.RestAssured.baseURI;
 import static io.restassured.RestAssured.given;
 import static io.restassured.RestAssured.port;
@@ -22,6 +20,7 @@ public class MockHelper {
         port = new Integer(app.getProperty("ds_port"));
 
         wms = new WireMockServer();
+        wms.start();
     }
 
     private Response sendPostRequest(String xUserId, String path, String orderId) {
@@ -34,10 +33,13 @@ public class MockHelper {
                 .post(path);
     }
 
-    public Response createActivity(String xUserId, String orderId) throws IOException {
-        wms.start();
+    public Response createActivity(String xUserId, String orderId) throws IOException, InterruptedException {
         Response resp = sendPostRequest(xUserId, "/admin/activities/order", orderId);
-        wms.shutdown();
+        Thread.sleep(500);
         return resp;
+    }
+
+    public void shutdown() {
+        wms.shutdown();
     }
 }

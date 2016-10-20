@@ -1,5 +1,6 @@
 package com.adstream.api.tests;
 
+import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeSuite;
 import com.adstream.api.appmanager.ApplicationManager;
 
@@ -16,4 +17,8 @@ public class TestBase {
     app.init();
   }
 
+  @AfterSuite
+  public void tearDown() throws Exception {
+    app.mock().shutdown();
+  }
 }

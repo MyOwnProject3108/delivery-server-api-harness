@@ -16,12 +16,38 @@ public class AdditionalServicesTest extends TestBase {
 
   private String ttm_userId;
   private String btm_userId;
-  private String dubbingServiceId = "57e80a20400a925fd1699094-28001";
+  private String dubbingServiceId;
 
   @BeforeClass
-  public void init() {
+  public void init() throws IOException, InterruptedException {
     ttm_userId = app.getProperty("TTM_userId");
     btm_userId = app.getProperty("BTM_userId");
+    dubbingServiceId = getDubbingServiceId();
+  }
+
+  private String getDubbingServiceId() throws IOException, InterruptedException {
+    setNew();
+    return app.rest().getOrderDetails(ttm_userId, "5800fa9c7af9be2d19d8e3f4")
+              .then().log().ifError().statusCode(200)
+              .extract()
+              .path("orderItems[0].additionalServices.dubbingServices[0]._id");
+  }
+
+  private void setNew() throws IOException, InterruptedException {
+    Response activity = app.mock().createActivity(ttm_userId, "5800fa9c7af9be2d19d8e3f4");
+    activity.then().log().ifError().statusCode(202);
+  }
+
+  private void setInProgress() throws IOException, InterruptedException {
+    setNew();
+    app.rest().updateDubbingStatus(ttm_userId, dubbingServiceId,
+            new StatusAS().withOldStatus("New").withNewStatus("Transfer In Progress")).then().log().ifError();
+  }
+
+  private void setComplete() throws IOException, InterruptedException {
+    setNew();
+    app.rest().updateDubbingStatus(ttm_userId, dubbingServiceId,
+            new StatusAS().withOldStatus("New").withNewStatus("Transfer Complete")).then().log().ifError();
   }
 
   //TRANSITIONS
@@ -65,7 +91,8 @@ public class AdditionalServicesTest extends TestBase {
   //DUBBING SERVICE
   //update DubbingService status
   @Test
-  public void testUpdDubbing_NewToProgress() throws IOException {
+  public void testUpdDubbing_NewToProgress() throws IOException, InterruptedException {
+    setNew();
     StatusAS body = new StatusAS().withOldStatus("New").withNewStatus("Transfer In Progress");
     Response response = app.rest().updateDubbingStatus(ttm_userId, dubbingServiceId, body);
     response
@@ -75,8 +102,9 @@ public class AdditionalServicesTest extends TestBase {
 
   //TOFIX: server shouldn't set status to Complete without completeDate
   @Test
-  public void testUpdDubbing_NewToComplete() throws IOException {
-    StatusAS body = new StatusAS().withOldStatus("New").withNewStatus("Transfer Complete");
+  public void testUpdDubbing_ProgressToComplete() throws IOException, InterruptedException {
+    setInProgress();
+    StatusAS body = new StatusAS().withOldStatus("Transfer In Progress").withNewStatus("Transfer Complete");
     Response response = app.rest().updateDubbingStatus(ttm_userId, dubbingServiceId, body);
     response
             .then().log().all().statusCode(200)
@@ -85,8 +113,9 @@ public class AdditionalServicesTest extends TestBase {
 
   //TOFIX: server shouldn't set status to Complete without completeDate
   @Test
-  public void testUpdDubbing_ProgressToComplete() throws IOException {
-    StatusAS body = new StatusAS().withOldStatus("Transfer In Progress").withNewStatus("Transfer Complete");
+  public void testUpdDubbing_NewToComplete() throws IOException, InterruptedException {
+    setNew();
+    StatusAS body = new StatusAS().withOldStatus("New").withNewStatus("Transfer Complete");
     Response response = app.rest().updateDubbingStatus(ttm_userId, dubbingServiceId, body);
     response
             .then().log().all().statusCode(200)
@@ -115,7 +144,8 @@ public class AdditionalServicesTest extends TestBase {
 
   //TOFIX: response body has spare ""
   @Test
-  public void testUpdDubbing_NewToNew() throws IOException {
+  public void testUpdDubbing_NewToNew() throws IOException, InterruptedException {
+    setNew();
     StatusAS body = new StatusAS().withOldStatus("New").withNewStatus("New");
     Response response = app.rest().updateDubbingStatus(ttm_userId, dubbingServiceId, body);
     response
@@ -126,7 +156,8 @@ public class AdditionalServicesTest extends TestBase {
 
   //TOFIX: response body has spare ""
   @Test
-  public void testUpdDubbing_ProgressToProgress() throws IOException {
+  public void testUpdDubbing_ProgressToProgress() throws IOException, InterruptedException {
+    setInProgress();
     StatusAS body = new StatusAS().withOldStatus("Transfer In Progress").withNewStatus("Transfer In Progress");
     Response response = app.rest().updateDubbingStatus(ttm_userId, dubbingServiceId, body);
     response
@@ -137,7 +168,8 @@ public class AdditionalServicesTest extends TestBase {
 
   //TOFIX: response body has spare ""
   @Test
-  public void testUpdDubbing_CompleteToComplete() throws IOException {
+  public void testUpdDubbing_CompleteToComplete() throws IOException, InterruptedException {
+    setComplete();
     StatusAS body = new StatusAS().withOldStatus("Transfer Complete").withNewStatus("Transfer Complete");
     Response response = app.rest().updateDubbingStatus(ttm_userId, dubbingServiceId, body);
     response
