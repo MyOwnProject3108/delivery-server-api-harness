@@ -33,9 +33,8 @@ public class MockHelper {
                 .post(path);
     }
 
-    public Response createActivity(String xUserId, String orderId) throws IOException, InterruptedException {
+    public Response createActivity(String xUserId, String orderId) throws IOException {
         Response resp = sendPostRequest(xUserId, "/admin/activities/order", orderId);
-        Thread.sleep(500);
         return resp;
     }
 

@@ -14,15 +14,15 @@ public class ApplicationManager {
     private final Properties properties;
     private RestHelper restHelper;
     private MockHelper mockHelper;
-    private PapiHelper papiHelper;
 
     public ApplicationManager() {
         properties = new Properties();
-    }
-
-    public void init() throws IOException {
-        String target = System.getProperty("target", "qa23");
-        properties.load(new FileReader(new File(String.format("src/test/resources/%s.properties", target))));
+        String target = System.getProperty("target");
+        try {
+            properties.load(new FileReader(new File(String.format("src/test/resources/%s.properties", target))));
+        } catch (IOException e) {
+            System.out.println("Missing target property file into VM options: -Dtarget=<target.properties>");
+        }
     }
 
     public String getProperty(String key) {
@@ -41,12 +41,5 @@ public class ApplicationManager {
             mockHelper = new MockHelper(this);
         }
         return mockHelper;
-    }
-
-    public PapiHelper papi() {
-        if (papiHelper == null) {
-            papiHelper = new PapiHelper(this);
-        }
-        return papiHelper;
     }
 }
