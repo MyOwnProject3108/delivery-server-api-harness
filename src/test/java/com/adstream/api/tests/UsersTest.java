@@ -31,7 +31,7 @@ public class UsersTest extends TestBase {
     Response response = app.rest().getUserDetails(ttm_userId, ttm_userId);
     response.
             then().log().all().statusCode(200).
-            and().assertThat().body(matchesJsonSchemaInClasspath("User.json"));
+            and().assertThat().body(matchesJsonSchemaInClasspath("schema/User.json"));
   }
 
   @Test
@@ -39,7 +39,7 @@ public class UsersTest extends TestBase {
     Response response = app.rest().getUserDetails(ttm_userId, btm_userId);
     response.
             then().log().all().statusCode(200).
-            and().assertThat().body(matchesJsonSchemaInClasspath("User.json"));
+            and().assertThat().body(matchesJsonSchemaInClasspath("schema/User.json"));
   }
 
   @Test
