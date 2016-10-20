@@ -16,25 +16,27 @@ public class AdditionalServicesTest extends TestBase {
 
   private String ttm_userId;
   private String btm_userId;
+  private String dubbingMock;
   private String dubbingServiceId;
 
   @BeforeClass
   public void init() throws IOException, InterruptedException {
     ttm_userId = app.getProperty("TTM_userId");
     btm_userId = app.getProperty("BTM_userId");
+    dubbingMock = app.getProperty("dubbingMock");
     dubbingServiceId = getDubbingServiceId();
   }
 
   private String getDubbingServiceId() throws IOException, InterruptedException {
     setNew();
-    return app.rest().getOrderDetails(ttm_userId, "5800fa9c7af9be2d19d8e3f4")
+    return app.rest().getOrderDetails(ttm_userId, dubbingMock)
               .then().log().ifError().statusCode(200)
               .extract()
               .path("orderItems[0].additionalServices.dubbingServices[0]._id");
   }
 
   private void setNew() throws IOException, InterruptedException {
-    Response activity = app.mock().createActivity(ttm_userId, "5800fa9c7af9be2d19d8e3f4");
+    Response activity = app.mock().createActivity(ttm_userId, dubbingMock);
     activity.then().log().ifError().statusCode(202);
   }
 

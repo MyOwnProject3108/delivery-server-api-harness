@@ -16,7 +16,6 @@ public class ApplicationManager {
     private MockHelper mockHelper;
     private PapiHelper papiHelper;
 
-
     public ApplicationManager() {
         properties = new Properties();
     }
