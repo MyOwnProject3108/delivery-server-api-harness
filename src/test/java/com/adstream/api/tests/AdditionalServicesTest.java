@@ -74,7 +74,7 @@ public class AdditionalServicesTest extends TestBase {
   @Test
   //unauthorised request
   public void testGetTransitionsUnauth() throws IOException {
-    Response response = app.rest().getASTransitions("");
+    Response response = app.rest().getASTransitions(null);
     response
             .then().log().all().statusCode(400)
             .assertThat().body(equalTo("Request is missing required HTTP header 'X-User-Id'"));
@@ -128,7 +128,7 @@ public class AdditionalServicesTest extends TestBase {
   //unauthorised request
   public void testUpdDubbingUnauth() throws IOException {
     StatusAS body = new StatusAS().withOldStatus("").withNewStatus("");
-    Response response = app.rest().updateDubbingStatus("", dubbingServiceId, body);
+    Response response = app.rest().updateDubbingStatus(null, dubbingServiceId, body);
     response
             .then().log().all().statusCode(400)
             .assertThat().body(equalTo("Request is missing required HTTP header 'X-User-Id'"));
