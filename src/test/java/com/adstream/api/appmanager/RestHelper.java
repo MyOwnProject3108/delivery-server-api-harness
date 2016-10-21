@@ -1,6 +1,8 @@
 package com.adstream.api.appmanager;
 
 import com.adstream.api.model.BodyBuilder;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 
@@ -16,6 +18,8 @@ import static io.restassured.RestAssured.port;
  */
 public class RestHelper {
     private ApplicationManager app;
+
+    ObjectMapper mapper = new ObjectMapper();
 
     public RestHelper(ApplicationManager app) {
         this.app = app;
@@ -37,12 +41,13 @@ public class RestHelper {
                 .get(path);
     }
 
-    private Response sendPutRequest(String xUserId, String path, BodyBuilder body) {
+    private Response sendPutRequest(String xUserId, String path, Object body) throws JsonProcessingException {
         RequestSpecification partialReq = given().
                 baseUri(baseURI).port(port).
                 contentType("application/json");
+        String bodyStr = mapper.writeValueAsString(body);
         return setUserHeader(partialReq, xUserId)
-                .body(body)
+                .body(bodyStr)
                 .when()
                 .put(path);
     }
@@ -56,6 +61,16 @@ public class RestHelper {
                 .when()
                 .post(path);
     }
+
+    private Response sendDeleteRequest(String xUserId, String path) throws IOException{
+        RequestSpecification partialReq = given().
+                baseUri(baseURI).port(port);
+        return setUserHeader(partialReq, xUserId)
+                .when()
+                .delete(path);
+
+    }
+
 
     //AdditionalServices
     //GET /api/traffic/v1/additionalService/transitions -- Get map of transitions to display in UI
@@ -73,4 +88,27 @@ public class RestHelper {
     public Response getUserDetails(String xUserId, String userId) throws IOException {
         return sendGetRequest(xUserId, "/api/core/v1/user/" + userId);
     }
+
+
+    //Tabs
+    //get /api/traffic/v1/tab -- Retrieve tabs available to the current user
+    public Response getTabDetails(String xUserId) throws IOException{
+        return sendGetRequest(xUserId, "/api/traffic/v1/tab");
+    }
+
+    //DELETE /api/traffic/v1/tab/{tabId}
+    public Response deleteTab(String xUserId, String tabId) throws IOException{
+        return sendDeleteRequest(xUserId, "/api/traffic/v1/tab/" + tabId);
+    }
+
+    //POST /api/traffic/v1/tab
+    public Response postCreateNewTab(String xUserId, BodyBuilder body){
+        return  sendPostRequest(xUserId,"/api/traffic/v1/tab", body);
+    }
+
+    //PUT /api/traffic/v1/tab/user - Arrange tabs for the user
+    public Response putArrangeTabs(String xUserId, Object body) throws JsonProcessingException {
+        return sendPutRequest(xUserId, "/api/traffic/v1/tab/user",body);
+    }
+
 }
