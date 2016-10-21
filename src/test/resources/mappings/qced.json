@@ -1,0 +1,10 @@
+{
+    "request": {
+        "method": "GET",
+        "urlPathPattern": "/ordering/traffic/5800f6207af9be2d19d8e12c*"
+    },
+    "response": {
+        "status": 200,
+        "bodyFileName": "/ordering/traffic/5800f6207af9be2d19d8e12c"
+    }
+}

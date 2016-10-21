@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 
 import static io.restassured.RestAssured.*;
@@ -17,23 +18,21 @@ import static io.restassured.RestAssured.port;
  * Created by natla on 26/07/2016.
  */
 public class RestHelper {
-    private ApplicationManager app;
 
     ObjectMapper mapper = new ObjectMapper();
 
     public RestHelper(ApplicationManager app) {
-        this.app = app;
         baseURI = app.getProperty("baseURI");
         port = new Integer(app.getProperty("ds_port"));
     }
 
-    private RequestSpecification setUserHeader(RequestSpecification request, String xUserId) {
-        if (xUserId.length() > 0)
+    private RequestSpecification setUserHeader(RequestSpecification request, @Nullable String xUserId) {
+        if (xUserId != null)
             return request.header("X-User-Id", xUserId);
         return request;
     }
 
-    private Response sendGetRequest(String xUserId, String path) {
+    private Response sendGetRequest(@Nullable String xUserId, String path) {
         RequestSpecification partialReq = given().
                 baseUri(baseURI).port(port);
         return setUserHeader(partialReq, xUserId)
@@ -41,7 +40,7 @@ public class RestHelper {
                 .get(path);
     }
 
-    private Response sendPutRequest(String xUserId, String path, Object body) throws JsonProcessingException {
+    private Response sendPutRequest(@Nullable String xUserId, String path, BodyBuilder body) throws JsonProcessingException{
         RequestSpecification partialReq = given().
                 baseUri(baseURI).port(port).
                 contentType("application/json");
@@ -52,7 +51,7 @@ public class RestHelper {
                 .put(path);
     }
 
-    private Response sendPostRequest(String xUserId, String path, BodyBuilder body) {
+    private Response sendPostRequest(@Nullable String xUserId, String path, BodyBuilder body) {
         RequestSpecification partialReq = given().
                 baseUri(baseURI).port(port).
                 contentType("application/json");
@@ -74,18 +73,18 @@ public class RestHelper {
 
     //AdditionalServices
     //GET /api/traffic/v1/additionalService/transitions -- Get map of transitions to display in UI
-    public Response getASTransitions(String xUserId) throws IOException {
+    public Response getASTransitions(@Nullable String xUserId) throws IOException {
         return sendGetRequest(xUserId, "/api/traffic/v1/additionalService/transitions");
     }
 
     //PUT /api/traffic/v1/dubbingService/{dubbingServiceId} -- Updates the status of dubbing Service
-    public Response updateDubbingStatus(String xUserId, String dubbingServiceId, BodyBuilder body) throws IOException {
+    public Response updateDubbingStatus(@Nullable String xUserId, String dubbingServiceId, BodyBuilder body) throws IOException {
         return sendPutRequest(xUserId, "/api/traffic/v1/dubbingService/" + dubbingServiceId, body);
     }
 
     //Users
     //GET /api/core/v1/user/{userId} -- Retrieve user details
-    public Response getUserDetails(String xUserId, String userId) throws IOException {
+    public Response getUserDetails(@Nullable String xUserId, String userId) throws IOException {
         return sendGetRequest(xUserId, "/api/core/v1/user/" + userId);
     }
 
@@ -109,6 +108,15 @@ public class RestHelper {
     //PUT /api/traffic/v1/tab/user - Arrange tabs for the user
     public Response putArrangeTabs(String xUserId, Object body) throws JsonProcessingException {
         return sendPutRequest(xUserId, "/api/traffic/v1/tab/user",body);
+    }
+
+
+    public Response getOrderDetails(@Nullable String xUserId, String orderId) throws IOException {
+        return sendGetRequest(xUserId, "/api/traffic/v1/order/" + orderId);
+    }
+
+    public Response getOrderItemDetails(@Nullable String xUserId, String orderItemId) throws IOException {
+        return sendGetRequest(xUserId, "/api/traffic/v1/orderitem/" + orderItemId);
     }
 
 }
