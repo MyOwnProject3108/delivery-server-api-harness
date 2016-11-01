@@ -1,6 +1,5 @@
 package com.adstream.api.appmanager;
 
-import com.adstream.api.model.BodyBuilder;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 
@@ -36,7 +35,7 @@ public class RestHelper {
                 .get(path);
     }
 
-    private Response sendPutRequest(@Nullable String xUserId, String path, BodyBuilder body) {
+    private Response sendPutRequest(@Nullable String xUserId, String path, Object body) {
         RequestSpecification partialReq = given().
                 baseUri(baseURI).port(port).
                 contentType("application/json");
@@ -46,7 +45,7 @@ public class RestHelper {
                 .put(path);
     }
 
-    private Response sendPostRequest(@Nullable String xUserId, String path, BodyBuilder body) {
+    private Response sendPostRequest(@Nullable String xUserId, String path, Object body) {
         RequestSpecification partialReq = given().
                 baseUri(baseURI).port(port).
                 contentType("application/json");
@@ -63,7 +62,7 @@ public class RestHelper {
     }
 
     //PUT /api/traffic/v1/dubbingService/{dubbingServiceId} -- Updates the status of dubbing Service
-    public Response updateDubbingStatus(@Nullable String xUserId, String dubbingServiceId, BodyBuilder body) throws IOException {
+    public Response updateDubbingStatus(@Nullable String xUserId, String dubbingServiceId, Object body) throws IOException {
         return sendPutRequest(xUserId, "/api/traffic/v1/dubbingService/" + dubbingServiceId, body);
     }
 

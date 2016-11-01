@@ -63,7 +63,7 @@ public class AdditionalServicesTest extends TestBase {
   }
 
   @Test
-  //should BTM see transitions????
+  //TBC: should BTM see transitions??
   public void testGetTransitionsBTM() throws IOException {
     Response response = app.rest().getASTransitions(btm_userId);
     response
@@ -102,7 +102,7 @@ public class AdditionalServicesTest extends TestBase {
             .assertThat().body(equalTo("OK"));
   }
 
-  //TOFIX: server shouldn't set status to Complete without completeDate
+  //TOFIX NIR-523: server shouldn't set status to Complete without completeDate
   @Test
   public void testUpdDubbing_ProgressToComplete() throws IOException {
     mockInProgressDubbing();
@@ -113,7 +113,7 @@ public class AdditionalServicesTest extends TestBase {
             .assertThat().body(equalTo("OK"));
   }
 
-  //TOFIX: server shouldn't set status to Complete without completeDate
+  //TOFIX NIR-523: server shouldn't set status to Complete without completeDate
   @Test
   public void testUpdDubbing_NewToComplete() throws IOException {
     mockNewDubbing();
@@ -139,6 +139,17 @@ public class AdditionalServicesTest extends TestBase {
   public void testUpdDubbingInvalid() throws IOException {
     StatusAS body = new StatusAS().withOldStatus("").withNewStatus("");
     Response response = app.rest().updateDubbingStatus(ttm_userId + "1", dubbingServiceId, body);
+    response
+            .then().log().all().statusCode(403)
+            .assertThat().body(equalTo("The supplied authentication is not authorized to access this resource"));
+  }
+
+  //TBC: BTM shouldn't be able to change AS status
+  @Test(enabled = false)
+  public void testUpdDubbing_NewToProgressBTM() throws IOException {
+    mockNewDubbing();
+    StatusAS body = new StatusAS().withOldStatus("New").withNewStatus("Transfer In Progress");
+    Response response = app.rest().updateDubbingStatus(btm_userId, dubbingServiceId, body);
     response
             .then().log().all().statusCode(403)
             .assertThat().body(equalTo("The supplied authentication is not authorized to access this resource"));
