@@ -4,27 +4,18 @@ import com.adstream.api.model.NewTab;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import io.restassured.mapper.ObjectMapper;
-import io.restassured.path.json.JsonPath;
-import io.restassured.response.ResponseBodyExtractionOptions;
-import org.apache.http.util.EntityUtils;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import io.restassured.response.Response;
-import org.w3c.dom.Entity;
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import static io.restassured.http.ContentType.fromContentType;
 import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspath;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.startsWith;
 
 /**
  * Created by Faiyyaz.Shaik on 10/12/2016.
@@ -74,7 +65,7 @@ public class TabTest extends TestBase {
         Response response = app.rest().getTabDetails(ttm_userId);
         response
                 .then().log().all().statusCode(200)
-                .and().assertThat().body(matchesJsonSchemaInClasspath("Tabs.json"));
+                .and().assertThat().body(matchesJsonSchemaInClasspath("schema/TabsList.json"));
 
     }
 
@@ -109,7 +100,7 @@ public class TabTest extends TestBase {
         Response response = app.rest().createNewTab(ttm_userId, body);
         response
                 .then().log().all().statusCode(200)
-                .and().assertThat().body(matchesJsonSchemaInClasspath("POSTTab.json"));
+                .and().assertThat().body(matchesJsonSchemaInClasspath("schema/Tab.json"));
         generalTab = response.then().contentType(JSON).extract().path("_id");
 //        System.out.println("print general tab ID..." + tabId.toString());
     }
@@ -120,7 +111,7 @@ public class TabTest extends TestBase {
         NewTab body = new NewTab().setName("API Private Tab")
                 .setPublic(false).setDefault(true).setTabType("OrderItemClock").setBusinessUnitId(businessUnitId);
         Response response = app.rest().createNewTab(ttm_userId, body);
-        response.then().log().all().statusCode(200).and().assertThat().body(matchesJsonSchemaInClasspath("POSTTab.json"));
+        response.then().log().all().statusCode(200).and().assertThat().body(matchesJsonSchemaInClasspath("schema/Tab.json"));
         privateTab = response.then().contentType(JSON).extract().path("_id");
 
     }
@@ -131,7 +122,7 @@ public class TabTest extends TestBase {
         NewTab body = new NewTab().setName("API Public Tab")
                 .setPublic(true).setDefault(false).setTabType("OrderItemClock").setBusinessUnitId(businessUnitId);
         Response response = app.rest().createNewTab(ttm_userId, body);
-        response.then().log().all().statusCode(200).and().assertThat().body(matchesJsonSchemaInClasspath("POSTTab.json"));
+        response.then().log().all().statusCode(200).and().assertThat().body(matchesJsonSchemaInClasspath("schema/Tab.json"));
         publicTab = response.then().contentType(JSON).extract().path("_id");
 
     }
@@ -142,7 +133,7 @@ public class TabTest extends TestBase {
         NewTab body = new NewTab().setName("API Custom Tab")
                 .setPublic(false).setDefault(false).setTabType("OrderItemClock").setBusinessUnitId(businessUnitId);
         Response response = app.rest().createNewTab(ttm_userId, body);
-        response.then().log().all().statusCode(200).and().assertThat().body(matchesJsonSchemaInClasspath("POSTTab.json"));
+        response.then().log().all().statusCode(200).and().assertThat().body(matchesJsonSchemaInClasspath("schema/Tab.json"));
         customTab = response.then().contentType(JSON).extract().path("_id");
 
     }
@@ -153,7 +144,7 @@ public class TabTest extends TestBase {
         NewTab body = new NewTab().setName("API Custom Tab")
                 .setPublic(false).setDefault(false).setTabType("OrderItemSend").setBusinessUnitId(businessUnitId);
         Response response = app.rest().createNewTab(btm_userId, body);
-        response.then().log().all().statusCode(200).and().assertThat().body(matchesJsonSchemaInClasspath("POSTTab.json"));
+        response.then().log().all().statusCode(200).and().assertThat().body(matchesJsonSchemaInClasspath("schema/Tab.json"));
 
     }
 
@@ -186,7 +177,7 @@ public class TabTest extends TestBase {
         NewTab body = new NewTab().setTabId(tabId).setName("API Tab Edit").setPublic(false).setDefault(false)
                 .setTabType("OrderItemClock").setBusinessUnitId(businessUnitId);
         Response response = app.rest().createNewTab(ttm_userId, body);
-        response.then().log().all().statusCode(200).and().body(matchesJsonSchemaInClasspath("POSTTab.json"));
+        response.then().log().all().statusCode(200).and().body(matchesJsonSchemaInClasspath("schema/Tab.json"));
 
     }
 
