@@ -21,7 +21,7 @@ public class ApplicationManager {
         try {
             properties.load(new FileReader(new File(String.format("src/test/resources/%s.properties", target))));
         } catch (IOException e) {
-            System.out.println("Missing target property file into VM options: -Dtarget=<target.properties>");
+            throw new RuntimeException("Missing target property file into VM options: -Dtarget=<target.properties>");
         }
     }
 
