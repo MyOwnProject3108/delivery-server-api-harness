@@ -3,7 +3,7 @@ package com.adstream.api.model;
 /**
  * Created by natla on 26/07/2016.
  */
-public class StatusAS extends BodyBuilder {
+public class StatusAS extends Object {
 
   private String oldStatus;
   private String newStatus;
