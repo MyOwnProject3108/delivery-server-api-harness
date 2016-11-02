@@ -23,7 +23,11 @@ public class RestHelper {
 
     public RestHelper(ApplicationManager app) {
         baseURI = app.getProperty("baseURI");
-        port = new Integer(app.getProperty("ds_port"));
+        try {
+            port = new Integer(app.getProperty("ds_port"));
+        } catch (Exception e) {
+            throw new RuntimeException("Cannot read service port", e);
+        }
     }
 
     private RequestSpecification setUserHeader(RequestSpecification request, @Nullable String xUserId) {
@@ -40,7 +44,7 @@ public class RestHelper {
                 .get(path);
     }
 
-    private Response sendPutRequest(@Nullable String xUserId, String path, BodyBuilder body) throws JsonProcessingException{
+    private Response sendPutRequest(@Nullable String xUserId, String path, Object body) throws JsonProcessingException{
         RequestSpecification partialReq = given().
                 baseUri(baseURI).port(port).
                 contentType("application/json");
@@ -51,7 +55,7 @@ public class RestHelper {
                 .put(path);
     }
 
-    private Response sendPostRequest(@Nullable String xUserId, String path, BodyBuilder body) {
+    private Response sendPostRequest(@Nullable String xUserId, String path, Object body) {
         RequestSpecification partialReq = given().
                 baseUri(baseURI).port(port).
                 contentType("application/json");
@@ -61,7 +65,7 @@ public class RestHelper {
                 .post(path);
     }
 
-    private Response sendDeleteRequest(String xUserId, String path) throws IOException{
+    private Response sendDeleteRequest(@Nullable String xUserId, String path) throws IOException{
         RequestSpecification partialReq = given().
                 baseUri(baseURI).port(port);
         return setUserHeader(partialReq, xUserId)
@@ -91,22 +95,22 @@ public class RestHelper {
 
     //Tabs
     //get /api/traffic/v1/tab -- Retrieve tabs available to the current user
-    public Response getTabDetails(String xUserId) throws IOException{
+    public Response getTabDetails(@Nullable String xUserId) throws IOException{
         return sendGetRequest(xUserId, "/api/traffic/v1/tab");
     }
 
     //DELETE /api/traffic/v1/tab/{tabId}
-    public Response deleteTab(String xUserId, String tabId) throws IOException{
+    public Response deleteTab(@Nullable String xUserId, @Nullable String tabId) throws IOException{
         return sendDeleteRequest(xUserId, "/api/traffic/v1/tab/" + tabId);
     }
 
     //POST /api/traffic/v1/tab
-    public Response postCreateNewTab(String xUserId, BodyBuilder body){
+    public Response createNewTab(@Nullable String xUserId, Object body){
         return  sendPostRequest(xUserId,"/api/traffic/v1/tab", body);
     }
 
     //PUT /api/traffic/v1/tab/user - Arrange tabs for the user
-    public Response putArrangeTabs(String xUserId, Object body) throws JsonProcessingException {
+    public Response arrangeTabs(@Nullable String xUserId, Object body) throws JsonProcessingException {
         return sendPutRequest(xUserId, "/api/traffic/v1/tab/user",body);
     }
 

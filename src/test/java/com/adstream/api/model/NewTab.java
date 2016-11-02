@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 /**
  * Created by Faiyyaz.Shaik on 10/14/2016.
  */
-public class NewTab extends BodyBuilder{
+public class NewTab extends Object{
 
     private String name;
     @JsonProperty("public")
@@ -17,19 +17,7 @@ public class NewTab extends BodyBuilder{
     private String tabType;
     private String businessUnitId;
     private String tabId;
- //   String[] myTabId ;
 
- /*   public NewTab setTabIdFromArray(String[] myTabId){
-        for(int i=0; i<myTabId.length; i++){
-            String element = myTabId[i];
-
-        }
-        return this;
-    }
-
-    public String[] getTabIdFromArray(){
-        return myTabId;
-    }*/
 
     public NewTab setTabId(String tabId){
         this.tabId = tabId;
