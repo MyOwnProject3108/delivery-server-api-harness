@@ -1,6 +1,5 @@
 package com.adstream.api.appmanager;
 
-import com.adstream.api.model.BodyBuilder;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.response.Response;
@@ -83,7 +82,7 @@ public class RestHelper {
     }
 
     //PUT /api/traffic/v1/dubbingService/{dubbingServiceId} -- Updates the status of dubbing Service
-    public Response updateDubbingStatus(@Nullable String xUserId, String dubbingServiceId, BodyBuilder body) throws IOException {
+    public Response updateDubbingStatus(@Nullable String xUserId, String dubbingServiceId, Object body) throws IOException {
         return sendPutRequest(xUserId, "/api/traffic/v1/dubbingService/" + dubbingServiceId, body);
     }
 
