@@ -16,6 +16,7 @@ public class NewTab extends Object{
     private boolean isDefault;
     private String tabType;
     private String businessUnitId;
+    @JsonProperty("_id")
     private String tabId;
 
 

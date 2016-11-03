@@ -75,6 +75,7 @@ public class RestHelper {
     }
 
 
+
     //AdditionalServices
     //GET /api/traffic/v1/additionalService/transitions -- Get map of transitions to display in UI
     public Response getASTransitions(@Nullable String xUserId) throws IOException {
@@ -107,6 +108,12 @@ public class RestHelper {
     //POST /api/traffic/v1/tab
     public Response createNewTab(@Nullable String xUserId, Object body){
         return  sendPostRequest(xUserId,"/api/traffic/v1/tab", body);
+    }
+
+    //PUT /api/traffic/v1/tab/user - Update a tab
+    //Added now.......
+    public Response updateTab(@Nullable String xUserId, Object body) throws IOException{
+        return sendPutRequest(xUserId, "/api/traffic/v1/tab", body);
     }
 
     //PUT /api/traffic/v1/tab/user - Arrange tabs for the user
