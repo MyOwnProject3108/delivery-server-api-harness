@@ -1,12 +1,14 @@
 package com.adstream.api.model;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 
 /**
  * Created by Faiyyaz.Shaik on 10/14/2016.
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class NewTab extends Object{
 
     private String name;
