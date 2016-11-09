@@ -99,6 +99,10 @@ public class RestHelper {
         return sendGetRequest(xUserId, "/api/traffic/v1/tab");
     }
 
+    public Response getTabById(String xUserId, String tabId) throws IOException{
+        return sendGetRequest(xUserId, "/api/traffic/v1/order/tab/" + tabId);
+    }
+
     //DELETE /api/traffic/v1/tab/{tabId}
     public Response deleteTab(@Nullable String xUserId, @Nullable String tabId) throws IOException{
         return sendDeleteRequest(xUserId, "/api/traffic/v1/tab/" + tabId);
