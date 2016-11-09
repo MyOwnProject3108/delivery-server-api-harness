@@ -13,6 +13,7 @@ import static io.restassured.http.ContentType.JSON;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspath;
@@ -142,9 +143,94 @@ public class TabTest extends TestBase {
         return generalTabId;
     }
 
-    // PUT method scenarios
+    private List<Response> createTabCombinations(List<String> tabTypeList, String role, String xUserId) throws IOException {
+        List<Boolean> booleanList = Arrays.asList(true, false);
 
+        List<Response> responses = new ArrayList<>();
 
+        for(String tabType : tabTypeList) {
+            for(boolean access: booleanList) {
+                for(boolean defaultV: booleanList) {
+                    NewTab body = new NewTab();
+                    body.setName("API " + role + "_" + tabType + access + defaultV);
+                    body.setPublic(access);
+                    body.setDefault(defaultV);
+                    body.setTabType(tabType);
+
+                    Response response = app.rest().createNewTab(xUserId, body);
+                    responses.add(response);
+                }
+            }
+        }
+        return responses;
+    }
+
+    private void positiveValidation(List<Response> responses) {
+        for (Response response : responses) {
+            response.then().log().all().statusCode(200)
+                    .and().assertThat().body(matchesJsonSchemaInClasspath("schema/Tab.json"));
+        }
+    }
+
+    private void negativeValidation(List<Response> responses) {
+        for (Response response : responses) {
+            response.then().log().all().statusCode(403)
+                    .and().assertThat().body(equalTo("The supplied authentication is not authorized to access this resource"));
+        }
+    }
+
+    //POST create tab combination rules for TFM - This method creates all the possible combinations
+    @Test
+    public void testCreateTabCombTFM() throws IOException {
+        List<String> tabTypeList = Arrays.asList("Order", "OrderItemClock", "OrderItemSend");
+        List<Response> responses = createTabCombinations(tabTypeList, "TTM", ttm_userId);
+        positiveValidation(responses);
+    }
+
+    //POST Create tab combinations rules for BTM - Send Tab - This method creates all the possible combinations
+    @Test
+    public void testCreateTabCombBTM() throws IOException{
+        List<String> tabTypeList = Collections.singletonList("OrderItemSend");
+        List<Response> responses = createTabCombinations(tabTypeList, "BTM", btm_userId);
+        positiveValidation(responses);
+    }
+
+    //POST Create tab combinations rules for BTMHub for Clock and Send types
+    @Test
+    public void createTabCombBTMHub() throws IOException{
+        List<String> tabTypeList = Arrays.asList("OrderItemClock", "OrderItemSend");
+        List<Response> responses = createTabCombinations(tabTypeList, "BTMHub", btm_hub_userId);
+        positiveValidation(responses);
+    }
+
+    //Negative combinations for BTM
+    //Bug - when both are false as per the checklist tabs shouldn't be created but it creates tab - Swagger sends OK response
+    @Test(enabled = false)
+    public void createTabNCombBTM() throws IOException{
+        List<String> tabTypeList = Arrays.asList("Order", "OrderItemClock");
+        List<Response> responses = createTabCombinations(tabTypeList, "BTM", btm_userId);
+        negativeValidation(responses);
+    }
+
+    //Negative combinations for BTMHub
+    //Bug - when both are false as per the checklist tabs shouldn't be created but it creates tab - Swagger sends OK response
+    @Test(enabled = false)
+    public void testCreateTabNCombBTMHub() throws IOException {
+        List<String> tabTypeList = Collections.singletonList("Order");
+        List<Response> responses = createTabCombinations(tabTypeList, "BTMHub", btm_hub_userId);
+        negativeValidation(responses);
+    }
+
+    //Tab combinations for non-Traffic user
+    //Bug - Scenario is passed but when I checked as an agency user by giving permission to Traffic it has created tabs
+    @Test
+    public void createTabNonTrafficUser() throws IOException{
+        List<String> tabTypeList = Arrays.asList("Order", "OrderItemClock", "OrderItemSend");
+        List<Response> responses = createTabCombinations(tabTypeList, "nonTraffic", non_traffic_userId);
+        negativeValidation(responses);
+    }
+
+    //PUT update existing tab
     //PUT /api/traffic/v1/tab  - update an existing tab with unauthorised user
     @Test
     public void testUpdateTabWithUnAuth() throws IOException {
@@ -269,207 +355,27 @@ public class TabTest extends TestBase {
 
     @Test(priority = 1)
     public void removeAllAPITabs() throws IOException {
-        Response response = app.rest().getTabDetails(ttm_userId);
+        List<String> userList = Arrays.asList(ttm_userId, btm_hub_userId, btm_userId, non_traffic_userId);
 
-        JsonObject jsonObject = new JsonObject();
-        List id_list = new ArrayList();
-        JsonParser parser = new JsonParser();
-        JsonArray jsonArray = (JsonArray) parser.parse(response.asString());
-        for (int i = 0; i < jsonArray.size(); i++) {
-            jsonObject = jsonArray.get(i).getAsJsonObject();
-            if (jsonObject.get("name").toString().contains("API"))
-                id_list.add(jsonObject.get("_id"));
-        }
+        for (String user : userList) {
+            Response response = app.rest().getTabDetails(user);
 
-        for (int j = 0; j < id_list.size(); j++) {
-
-            testDeleteTab(id_list.get(j).toString().replace("\"", ""));
-        }
-
-    }
-
-    // POST create tab combination rules for TFM - This method creates all the possible combinations
-    @Test
-    public void testCreateTabCombTFM() throws IOException {
-        List<Boolean> accessList = new ArrayList();
-        accessList.add(true);
-        accessList.add(false);
-
-        List<Boolean> defaultList = new ArrayList();
-        defaultList.add(true);
-        defaultList.add(false);
-
-        List<String> tabTypeList = new ArrayList();
-        tabTypeList.add("Order");
-        tabTypeList.add("OrderItemClock");
-        tabTypeList.add("OrderItemSend");
-
-        List<NewTab> result = new ArrayList<>();
-
-        for(String tabType : tabTypeList) {
-            for(boolean access: accessList) {
-                for(boolean defaultV: defaultList) {
-                    NewTab body = new NewTab();
-                    body.setName("API TTMTab_" + tabType + access + defaultV);
-                    body.setPublic(access);
-                    body.setDefault(defaultV);
-                    body.setTabType(tabType);
-
-                    Response response = app.rest().createNewTab(ttm_userId, body);
-                    response.then().log().all().statusCode(200).and().assertThat().body(matchesJsonSchemaInClasspath("schema/Tab.json"));
-
-                    result.add(response.as(NewTab.class));
-                }
+            JsonObject jsonObject = new JsonObject();
+            List id_list = new ArrayList();
+            JsonParser parser = new JsonParser();
+            JsonArray jsonArray = (JsonArray) parser.parse(response.asString());
+            for (int i = 0; i < jsonArray.size(); i++) {
+                jsonObject = jsonArray.get(i).getAsJsonObject();
+                if (jsonObject.get("name").toString().contains("API"))
+                    id_list.add(jsonObject.get("_id"));
             }
-        }
 
-     //   return result;
-    }
+            for (int j = 0; j < id_list.size(); j++) {
 
-    //Create tab combinations rules for BTM - Send Tab - This method creates all the possible combinations
-    @Test
-    public void testCreateSendTabCombBTM() throws IOException{
-        List<String>   tabTypeList = new ArrayList();
-        tabTypeList.add("OrderItemSend");
-
-        List<Boolean> accessList = new ArrayList();
-        accessList.add(true);
-        accessList.add(false);
-
-        List<Boolean> defaultList = new ArrayList();
-        defaultList.add(true);
-        defaultList.add(false);
-
-        List<NewTab> result = new ArrayList();
-
-        for(String tabType : tabTypeList){
-            for(boolean access : accessList){
-                for(boolean defaultV : defaultList){
-                    NewTab body = new NewTab();
-                    body.setName("API BTM_" + tabType+access+defaultV);
-                    body.setDefault(defaultV);
-                    body.setPublic(access);
-                    body.setTabType(tabType);
-                    Response response = app.rest().createNewTab(btm_userId, body);
-                    response.then().log().all().statusCode(200).and().assertThat().body(matchesJsonSchemaInClasspath("schema/Tab.json"));
-                    result.add(response.as(NewTab.class));
-                }
-            }
-        }
-
-
-    }
-
-    //Create tab combinations rules for BTM Hub for Clock and Send types
-
-    @Test
-    public void createTabCombBTMHub() throws IOException{
-        List<String> tabTypeList = new ArrayList();
-        tabTypeList.add("OrderItemSend");
-        tabTypeList.add("OrderItemClock");
-
-        List<Boolean> accessList = new ArrayList();
-        accessList.add(true);
-      //  accessList.add(false);
-
-        List<Boolean> defaultList = new ArrayList();
-        defaultList.add(true);
-        accessList.add(false);
-
-        List<NewTab> result = new ArrayList();
-        for(String tabType : tabTypeList){
-            for(boolean access : accessList){
-                for(boolean defaultV : defaultList){
-                    NewTab body = new NewTab();
-                    body.setName("API BTMHUB" + tabType+access+defaultV);
-                    body.setDefault(defaultV);
-                    body.setPublic(access);
-                    body.setTabType(tabType);
-                    Response response = app.rest().createNewTab(btm_hub_userId, body);
-                    response.then().log().all().statusCode(200).assertThat().body(matchesJsonSchemaInClasspath("schema/Tab.json"));
-
-                    result.add(response.as(NewTab.class));
-                }
+                testDeleteTab(id_list.get(j).toString().replace("\"", ""));
             }
         }
     }
-
-    // POST Create tab combinations for BTM public&default = False
-    //Bug - when both are false as per the checklist tabs shouldn't be created but it creates tab - Swagger sends OK response
-    @Test
-    public void createTabCombBTM() throws IOException{
-        List<String> tabTypeList = new ArrayList();
-        tabTypeList.add("Order");
-        tabTypeList.add("OrderItemClock");
-
-        List<Boolean> accessList = new ArrayList();
-        accessList.add(false);
-
-        List<Boolean> defaultList = new ArrayList();
-        defaultList.add(false);
-
-        for(String tabType : tabTypeList){
-            for(boolean access : accessList){
-                for(boolean defaultV : defaultList){
-                    NewTab body = new NewTab();
-                    body.setName("API BTMOrderAndClockTab"+ tabType+access+defaultV);
-                    body.setDefault(false);
-                    body.setPublic(false);
-                    body.setTabType(tabType);
-                    Response response = app.rest().createNewTab(btm_userId,body);
-                    response.then().log().all().statusCode(200).assertThat().body(equalTo("OK"));
-                }
-            }
-
-        }
-    }
-
-
-
-    //POST - Create a new tab for the current user as BTM Hub(public - False and default - false)
-    //Bug - when both are false as per the checklist tabs shouldn't be created but it creates tab - Swagger sends OK response
-    @Test
-    public void testCreateCustomBTMHubTab() throws IOException {
-        NewTab body = new NewTab().setName("API Custom Tab")
-                .setPublic(false).setDefault(false).setTabType("Order");
-        Response response = app.rest().createNewTab(btm_hub_userId, body);
-        response.then().log().all().statusCode(200).and().assertThat().body(equalTo("OK"));
-
-    }
-
-
-    //POST Create tab combinations rules for non-Traffic user
-    //Bug - Scenario is passed but when I checked as an agency user by giving permission to Traffic it has created tabs
-    @Test
-    public void createTabNonTrafficUser() throws IOException{
-        List<String> tabTypeList = new ArrayList();
-        tabTypeList.add("OrderItemSend");
-        tabTypeList.add("OrderItemClock");
-        tabTypeList.add("Order");
-
-        List<Boolean> accessList = new ArrayList();
-        accessList.add(true);
-
-        List<Boolean> defaultList = new ArrayList();
-        defaultList.add(false);
-
-        for(String tabType : tabTypeList){
-            for(boolean access : accessList){
-                for(boolean defaultV : defaultList){
-                    NewTab body = new NewTab();
-                    body.setName("API NonTrafficUser" + tabType+access+defaultV);
-                    body.setDefault(defaultV);
-                    body.setPublic(access);
-                    body.setTabType(tabType);
-                    Response response = app.rest().createNewTab(non_traffic_userId, body);
-                    response.then().log().all().statusCode(403).assertThat().body(equalTo("The supplied authentication is not authorized to access this resource"));
-                }
-            }
-        }
-
-    }
-
-
 }
 
 
