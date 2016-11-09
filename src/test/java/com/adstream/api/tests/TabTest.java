@@ -26,7 +26,7 @@ public class TabTest extends TestBase {
 
     private String ttm_userId;
     private String btm_userId;
-    private String businessUnitId;
+    private String ingestId;
     private String customTab;
     private String publicTab;
     private String generalTab;
@@ -40,7 +40,7 @@ public class TabTest extends TestBase {
     public void init() {
         ttm_userId = app.getProperty("TTM_userId");
         btm_userId = app.getProperty("BTM_userId");
-        businessUnitId = app.getProperty("businessUnitId");
+        ingestId = app.getProperty("IngestId");
         btm_hub_userId = app.getProperty("BTM_Hub_userId");
         non_traffic_userId = app.getProperty("Non_traffic_userId");
     }
@@ -263,6 +263,7 @@ public class TabTest extends TestBase {
     public void testUpdateTab() throws IOException {
         createGeneralTab();
         NewTab body = new NewTab().setTabId(generalTabId).setName("API General Tab Edit").setPublic(false).setDefault(false).setTabType("OrderItemClock").setBusinessUnitId(businessUnitId);
+        NewTab body = new NewTab().setTabId(generalTabId).setName("API General Tab Edit").setPublic(false).setDefault(false).setTabType("OrderItemClock");
         Response response = app.rest().updateTab(ttm_userId, body);
         response.then().log().all().statusCode(200).assertThat().body(equalTo("true"));
     }
