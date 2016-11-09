@@ -4,7 +4,6 @@ import com.adstream.api.model.NewTab;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.sun.org.apache.bcel.internal.generic.NEW;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import io.restassured.response.Response;
@@ -27,7 +26,6 @@ public class TabTest extends TestBase {
     private String ttm_userId;
     private String btm_userId;
     private String businessUnitId;
-    private String tabId;
     private String customTab;
     private String publicTab;
     private String generalTab;
@@ -47,8 +45,7 @@ public class TabTest extends TestBase {
     }
 
 
-    // GET Method Scenarios
-
+    //// GET - Retrieve tabs available to the current user
     //GET - Unauthorised request
     @Test
     public void testRetrieveTabUnAuth() throws IOException {
@@ -74,18 +71,13 @@ public class TabTest extends TestBase {
         response
                 .then().log().all().statusCode(200)
                 .and().assertThat().body(matchesJsonSchemaInClasspath("schema/TabsList.json"));
-
     }
 
-
-    // POST Method Scenarios
-
-
+    ////POST Create new tab for current user
     //POST - Create a new tab with  UnAuthorised user
     @Test
     public void testCreateNewTabUnAuth() throws IOException {
-        NewTab body = new NewTab().setName("API Tab UnAuth").setPublic(true).setDefault(true).setTabType("OrderItemClock")
-                .setBusinessUnitId(businessUnitId);
+        NewTab body = new NewTab().setName("API Tab UnAuth").setPublic(true).setDefault(true).setTabType("OrderItemClock");
         Response response = app.rest().createNewTab(null, body);
         response.then().log().all().statusCode(400).assertThat().body(equalTo("Request is missing required HTTP header 'X-User-Id'"));
     }
@@ -93,59 +85,52 @@ public class TabTest extends TestBase {
     //POST - Create a new tab with  Invalid Authorisation
     @Test
     public void testCreateNewTabInvalidAuth() throws IOException {
-        NewTab body = new NewTab().setName("API Tab Invalid Auth").setPublic(true).setDefault(true).setTabType("OrderItemClock")
-                .setBusinessUnitId(businessUnitId);
+        NewTab body = new NewTab().setName("API Tab Invalid Auth").setPublic(true).setDefault(true).setTabType("OrderItemClock");
         Response response = app.rest().createNewTab(ttm_userId + "123", body);
         response.then().log().all().statusCode(403).assertThat().body(equalTo("The supplied authentication is not authorized to access this resource"));
     }
-
 
     //POST - Create a new tab for the current user (public -True and default- True)
     @Test
     public void testCreateNewTab() throws IOException {
         NewTab body = new NewTab().setName("API General Tab").setPublic(true)
-                .setDefault(true).setTabType("OrderItemClock").setBusinessUnitId(businessUnitId);
+                .setDefault(true).setTabType("OrderItemClock");
         Response response = app.rest().createNewTab(ttm_userId, body);
         response
                 .then().log().all().statusCode(200)
                 .and().assertThat().body(matchesJsonSchemaInClasspath("schema/Tab.json"));
         generalTab = response.then().contentType(JSON).extract().path("_id");
-//        System.out.println("print general tab ID..." + tabId.toString());
     }
 
     //POST - Create a new tab for the current user (public - True and default - False)
     @Test
     public void testCreatePrivateTab() throws IOException {
         NewTab body = new NewTab().setName("API Private Tab")
-                .setPublic(false).setDefault(true).setTabType("OrderItemClock").setBusinessUnitId(businessUnitId);
+                .setPublic(false).setDefault(true).setTabType("OrderItemClock");
         Response response = app.rest().createNewTab(ttm_userId, body);
         response.then().log().all().statusCode(200).and().assertThat().body(matchesJsonSchemaInClasspath("schema/Tab.json"));
         privateTab = response.then().contentType(JSON).extract().path("_id");
-
     }
 
     //POST - Create a new tab for the current user (public - False and default - True)
     @Test
     public void testCreatePublicTab() throws IOException {
         NewTab body = new NewTab().setName("API Public Tab")
-                .setPublic(true).setDefault(false).setTabType("OrderItemClock").setBusinessUnitId(businessUnitId);
+                .setPublic(true).setDefault(false).setTabType("OrderItemClock");
         Response response = app.rest().createNewTab(ttm_userId, body);
         response.then().log().all().statusCode(200).and().assertThat().body(matchesJsonSchemaInClasspath("schema/Tab.json"));
         publicTab = response.then().contentType(JSON).extract().path("_id");
-
     }
 
     //POST - Create a new tab for the current user (public - False and default - false)
     @Test
     public void testCreateCustomTab() throws IOException {
         NewTab body = new NewTab().setName("API Custom Tab")
-                .setPublic(false).setDefault(false).setTabType("OrderItemClock").setBusinessUnitId(businessUnitId);
+                .setPublic(false).setDefault(false).setTabType("OrderItemClock");
         Response response = app.rest().createNewTab(ttm_userId, body);
         response.then().log().all().statusCode(200).and().assertThat().body(matchesJsonSchemaInClasspath("schema/Tab.json"));
         customTab = response.then().contentType(JSON).extract().path("_id");
-
     }
-
 
     // Create a general tab method and call it in other methods
     public String createGeneralTab() throws IOException {
@@ -179,16 +164,14 @@ public class TabTest extends TestBase {
         response.then().log().all().statusCode(403).assertThat().body(equalTo("The supplied authentication is not authorized to access this resource"));
     }
 
-
     //PUT /api/traffic/v1/tab  - update an existing tab
     @Test
     public void testUpdateTab() throws IOException {
         createGeneralTab();
-        NewTab body = new NewTab().setTabId(generalTabId).setName("API General Tab Edit").setPublic(false).setDefault(false).setTabType("OrderItemClock");
+        NewTab body = new NewTab().setTabId(generalTabId).setName("API General Tab Edit").setPublic(false).setDefault(false).setTabType("OrderItemClock").setBusinessUnitId(businessUnitId);
         Response response = app.rest().updateTab(ttm_userId, body);
         response.then().log().all().statusCode(200).assertThat().body(equalTo("true"));
     }
-
 
     //PUT - /api/traffic/v1/tab/user Update the order of the tabs for an unauthorised user
     @Test
@@ -200,7 +183,6 @@ public class TabTest extends TestBase {
         Response response = app.rest().arrangeTabs(null, myTabId);
         response.then().log().all().statusCode(400).assertThat().body(equalTo("Request is missing required HTTP header 'X-User-Id'"));
     }
-
 
     //PUT - /api/traffic/v1/tab/user  Update the order of the tabs for the current user with invalid authorisation
     @Test
@@ -228,8 +210,6 @@ public class TabTest extends TestBase {
 
 
     //DELETE method Scenarios
-
-
     //DELETE - Delete a tab with Empty TabId...Response message needs to be fixed
     @Test
     public void testDeleteTabEmptyTabId() throws IOException {
@@ -242,7 +222,8 @@ public class TabTest extends TestBase {
     //DELETE - Delete a tab with by providing invalid TabId
     @Test
     public void testDeleteTabInvalidTabId() throws IOException {
-        Response response = app.rest().deleteTab(ttm_userId, tabId + "123");
+        createGeneralTab();
+        Response response = app.rest().deleteTab(ttm_userId, generalTabId + "123");
         response
                 .then().log().all().statusCode(405)
                 .assertThat().body(equalTo("HTTP method not allowed, supported methods: GET, PUT, OPTIONS"));
@@ -252,7 +233,8 @@ public class TabTest extends TestBase {
     //DELETE - Delete a tab with UnAuthorised User
     @Test
     public void testDeleteTabUnAuth() throws IOException {
-        Response response = app.rest().deleteTab(null, tabId);
+        createGeneralTab();
+        Response response = app.rest().deleteTab(null, generalTabId);
         response
                 .then().log().all().statusCode(400)
                 .assertThat().body(equalTo("Request is missing required HTTP header 'X-User-Id'"));
@@ -261,7 +243,8 @@ public class TabTest extends TestBase {
     //DELETE - Delete a tab with UnAuthorised User
     @Test
     public void testDeleteTabInvalidAuth() throws IOException {
-        Response response = app.rest().deleteTab(ttm_userId + "123", tabId);
+        createGeneralTab();
+        Response response = app.rest().deleteTab(ttm_userId + "123", generalTabId);
         response
                 .then().log().all().statusCode(403)
                 .assertThat().body(equalTo("The supplied authentication is not authorized to access this resource"));
@@ -271,9 +254,7 @@ public class TabTest extends TestBase {
     public void testDeleteTab(String tabId) throws IOException {
         Response response = app.rest().deleteTab(ttm_userId, tabId);
         response.then().log().all().statusCode(200).assertThat().body(equalTo("OK"));
-
     }
-
 
     //DELETE - Delete a tab which was already deleted
     @Test
