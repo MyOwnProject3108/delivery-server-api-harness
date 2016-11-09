@@ -74,6 +74,14 @@ public class TabTest extends TestBase {
                 .and().assertThat().body(matchesJsonSchemaInClasspath("schema/TabsList.json"));
     }
 
+    @Test
+    public void testRetrieveAllTabsBTMHub() throws IOException {
+        Response response = app.rest().getTabDetails(btm_hub_userId);
+        response
+                .then().log().all().statusCode(200)
+                .and().assertThat().body(matchesJsonSchemaInClasspath("schema/TabsList.json"));
+    }
+
     ////POST Create new tab for current user
     //POST - Create a new tab with  UnAuthorised user
     @Test
@@ -336,17 +344,12 @@ public class TabTest extends TestBase {
                 .assertThat().body(equalTo("The supplied authentication is not authorized to access this resource"));
     }
 
-    //DELETE - Delete a tab - This is a method which is called in other tests...
-    public void testDeleteTab(String tabId) throws IOException {
-        Response response = app.rest().deleteTab(ttm_userId, tabId);
-        response.then().log().all().statusCode(200).assertThat().body(equalTo("OK"));
-    }
-
     //DELETE - Delete a tab which was already deleted
     @Test
     public void testAlreadyDeletedTab() throws IOException {
         testCreateCustomTab();
-        testDeleteTab(customTab);
+        app.rest().deleteTab(ttm_userId, customTab)
+                .then().log().ifError().statusCode(200).assertThat().body(equalTo("OK"));
         Response response = app.rest().deleteTab(ttm_userId, customTab);
         response
                 .then().log().all().statusCode(404)
@@ -357,8 +360,8 @@ public class TabTest extends TestBase {
     public void removeAllAPITabs() throws IOException {
         List<String> userList = Arrays.asList(ttm_userId, btm_hub_userId, btm_userId, non_traffic_userId);
 
-        for (String user : userList) {
-            Response response = app.rest().getTabDetails(user);
+        for (String xUserId : userList) {
+            Response response = app.rest().getTabDetails(xUserId);
 
             JsonObject jsonObject = new JsonObject();
             List id_list = new ArrayList();
@@ -371,8 +374,8 @@ public class TabTest extends TestBase {
             }
 
             for (int j = 0; j < id_list.size(); j++) {
-
-                testDeleteTab(id_list.get(j).toString().replace("\"", ""));
+                app.rest().deleteTab(xUserId, id_list.get(j).toString().replace("\"", ""))
+                        .then().log().ifError().statusCode(200).assertThat().body(equalTo("OK"));
             }
         }
     }
