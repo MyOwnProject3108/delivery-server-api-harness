@@ -20,6 +20,7 @@ public class NewTab extends Object{
     private String businessUnitId;
     @JsonProperty("_id")
     private String tabId;
+    private String userId;
 
 
     public NewTab setTabId(String tabId){
@@ -29,6 +30,15 @@ public class NewTab extends Object{
 
     public String getTabId(){
         return tabId;
+    }
+
+    public NewTab setCreateByUserId(String userId){
+        this.userId = userId;
+        return  this;
+    }
+
+    public String getCreateByUserId(){
+        return userId;
     }
 
     public NewTab setName(String name){
