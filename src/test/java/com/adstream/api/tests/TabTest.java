@@ -29,10 +29,6 @@ public class TabTest extends TestBase {
     private String ttm1_userId;
     private String btm_userId;
     private String ingestId;
-    private String customTab;
-    private String publicTab;
-    private String generalTab;
-    private String privateTab;
     private String generalTabId;
     private String btm_hub_userId;
     private String btm1_hub_userId;
@@ -83,6 +79,7 @@ public class TabTest extends TestBase {
                 .and().assertThat().body(matchesJsonSchemaInClasspath("schema/TabsList.json"));
     }
 
+    //GET - Retrieve tabs available to the current user BTM
     @Test
     public void testRetrieveAllTabsBTMHub() throws IOException {
         Response response = app.rest().getTabDetails(btm_hub_userId);
@@ -108,63 +105,18 @@ public class TabTest extends TestBase {
         response.then().log().all().statusCode(403).assertThat().body(equalTo("The supplied authentication is not authorized to access this resource"));
     }
 
-    //POST - Create a new tab for the current user (public -True and default- True)
-
-    @Test
-    public void testCreateNewTab() throws IOException {
-        NewTab body = new NewTab().setName("API General Tab").setPublic(true)
-                .setDefault(true).setTabType("OrderItemClock");
-        Response response = app.rest().createNewTab(ttm_userId, body);
-        response
-                .then().log().all().statusCode(200)
-                .and().assertThat().body(matchesJsonSchemaInClasspath("schema/Tab.json"));
-        generalTab = response.then().contentType(JSON).extract().path("_id");
-    }
-
-    //POST - Create a new tab for the current user (public - True and default - False)
-    @Test
-    public void testCreatePrivateTab() throws IOException {
-        NewTab body = new NewTab().setName("API Private Tab")
-                .setPublic(false).setDefault(true).setTabType("OrderItemClock");
-        Response response = app.rest().createNewTab(ttm_userId, body);
-        response.then().log().all().statusCode(200).and().assertThat().body(matchesJsonSchemaInClasspath("schema/Tab.json"));
-        privateTab = response.then().contentType(JSON).extract().path("_id");
-    }
-
-    //POST - Create a new tab for the current user (public - False and default - True)
-    @Test
-    public void testCreatePublicTab() throws IOException {
-        NewTab body = new NewTab().setName("API Public Tab")
-                .setPublic(true).setDefault(false).setTabType("OrderItemSend");
-        Response response = app.rest().createNewTab(ttm_userId, body);
-        response.then().log().all().statusCode(200).and().assertThat().body(matchesJsonSchemaInClasspath("schema/Tab.json"));
-        publicTab = response.then().contentType(JSON).extract().path("_id");
-    }
-
-    //POST - Create a new tab for the current user (public - False and default - false)
-    @Test
-    public void testCreateCustomTab() throws IOException {
-        NewTab body = new NewTab().setName("API Custom Tab")
-                .setPublic(false).setDefault(false).setTabType("OrderItemClock");
-        Response response = app.rest().createNewTab(ttm_userId, body);
-        response.then().log().all().statusCode(200).and().assertThat().body(matchesJsonSchemaInClasspath("schema/Tab.json"));
-        customTab = response.then().contentType(JSON).extract().path("_id");
-    }
 
     // Create a general tab method and call it in other methods
     public String createTab(String name,boolean isPublic, boolean isDefault, String tabType, String xUserId) throws IOException {
-      /* NewTab body = new NewTab().setName(name)
-                .setPublic(false).setDefault(false).setTabType("Order");*/
         NewTab body = new NewTab().setName(name)
                 .setPublic(isPublic).setDefault(isDefault).setTabType(tabType);
         Response response = app.rest().createNewTab(xUserId, body);
         response.then().log().all().statusCode(200).and().assertThat().body(matchesJsonSchemaInClasspath("schema/Tab.json"));
-        generalTabId = response.then().contentType(JSON).extract().path("_id");
-        return generalTabId;
-
-
+       return response.then().contentType(JSON).extract().path("_id");
     }
 
+
+    // Create Tab combinations method
     private List<Response> createTabCombinations(List<String> tabTypeList, String role, String xUserId) throws IOException {
         List<Boolean> booleanList = Arrays.asList(true, false);
 
@@ -187,6 +139,7 @@ public class TabTest extends TestBase {
         return responses;
     }
 
+    //Method for positive validation
     private void positiveValidation(List<Response> responses) {
         for (Response response : responses) {
             response.then().log().all().statusCode(200)
@@ -194,6 +147,7 @@ public class TabTest extends TestBase {
         }
     }
 
+    //Method for negative validation
     private void negativeValidation(List<Response> responses) {
         for (Response response : responses) {
             response.then().log().all().statusCode(403)
@@ -256,7 +210,7 @@ public class TabTest extends TestBase {
     //PUT /api/traffic/v1/tab  - update an existing tab with unauthorised user
     @Test
     public void testUpdateTabWithUnAuth() throws IOException {
-        createTab("API General Tab", false,false,"Order",ttm_userId);
+         generalTabId = createTab("API General Tab", false,false,"Order",ttm_userId);
         NewTab body = new NewTab().setTabId(generalTabId).setCreateByUserId(ttm_userId).setName("API Edit UnAuth").setPublic(true).setDefault(true).setTabType("Order");
 
         Response response = app.rest().updateTab(null, body);
@@ -266,7 +220,7 @@ public class TabTest extends TestBase {
     //PUT /api/traffic/v1/tab  - update an existing tab with Invalid Authorisation
     @Test
     public void testUpdateTabWithInvalidAuth() throws IOException {
-        createTab("API General Tab", false,false,"Order",ttm_userId);
+         generalTabId = createTab("API General Tab", false,false,"Order",ttm_userId);
         NewTab body = new NewTab().setTabId(generalTabId).setCreateByUserId(ttm_userId).setName("API Edit Invalid Auth").setPublic(true).setDefault(true).setTabType("Order");
         Response response = app.rest().updateTab(ttm_userId + "123", body);
         response.then().log().all().statusCode(403).assertThat().body(equalTo("The supplied authentication is not authorized to access this resource"));
@@ -275,19 +229,30 @@ public class TabTest extends TestBase {
     //PUT /api/traffic/v1/tab  - update an existing tab
     @Test
     public void testUpdateTab() throws IOException {
-        createTab("API General Tab", false,false,"Order",ttm_userId);
+         generalTabId =  createTab("API General Tab", false,false,"Order",ttm_userId);
         NewTab body = new NewTab().setTabId(generalTabId).setCreateByUserId(ttm_userId).setName("API General Tab 123").setPublic(false).setDefault(false).setTabType("Order");
         Response response = app.rest().updateTab(ttm_userId, body);
         response.then().log().all().statusCode(200).assertThat().body(equalTo("true"));
     }
 
+    //PUT - Update the order of the tabs for the current user not passing the body in the method.
+    @Test
+    public void testTabOrder() throws IOException {
+
+       String privateTabId = createTab("API New Private Tab", false,false,"Order",ttm_userId);
+       String publicTabId = createTab("API New Public Tab", true,true,"Order",ttm_userId);
+        String[] myTabId = {privateTabId,publicTabId};
+        Response response = app.rest().arrangeTabs(ttm_userId, myTabId);
+        response.then().log().all().statusCode(200).assertThat().body(equalTo("OK"));
+    }
+
+
     //PUT - /api/traffic/v1/tab/user Update the order of the tabs for an unauthorised user
     @Test
     public void testTabOrderUnAuth() throws IOException {
-
-        testCreateCustomTab();
-        testCreatePrivateTab();
-        String[] myTabId = {customTab, privateTab, publicTab, generalTab};
+        String privateTabId = createTab("API New Private Tab", false,false,"Order",ttm_userId);
+        String publicTabId = createTab("API New Public Tab", true,true,"Order",ttm_userId);
+        String[] myTabId = {privateTabId,publicTabId};
         Response response = app.rest().arrangeTabs(null, myTabId);
         response.then().log().all().statusCode(400).assertThat().body(equalTo("Request is missing required HTTP header 'X-User-Id'"));
     }
@@ -295,26 +260,13 @@ public class TabTest extends TestBase {
     //PUT - /api/traffic/v1/tab/user  Update the order of the tabs for the current user with invalid authorisation
     @Test
     public void testTabOrderInvalidAuth() throws IOException {
-        testCreateCustomTab();
-        testCreatePrivateTab();
-
-        String[] myTabId = {customTab, privateTab};
+        String privateTabId = createTab("API New Private Tab", false,false,"Order",ttm_userId);
+        String publicTabId = createTab("API New Public Tab", true,true,"Order",ttm_userId);
+        String[] myTabId = {privateTabId,publicTabId};
         Response response = app.rest().arrangeTabs(ttm_userId + "123", myTabId);
         response.then().log().all().statusCode(403).assertThat().body(equalTo("The supplied authentication is not authorized to access this resource"));
     }
 
-
-    //PUT - Update the order of the tabs for the current user not passing the body in the method.
-    @Test
-    public void testTabOrder() throws IOException {
-        testCreateCustomTab();
-        testCreatePrivateTab();
-        testCreatePublicTab();
-        testCreateNewTab();
-        String[] myTabId = {customTab, privateTab, publicTab, generalTab};
-        Response response = app.rest().arrangeTabs(ttm_userId, myTabId);
-        response.then().log().all().statusCode(200).assertThat().body(equalTo("OK"));
-    }
 
 
     //DELETE method Scenarios
@@ -330,7 +282,7 @@ public class TabTest extends TestBase {
     //DELETE - Delete a tab with by providing invalid TabId
     @Test
     public void testDeleteTabInvalidTabId() throws IOException {
-        createTab("API General Tab", false,false,"Order",ttm_userId);
+         generalTabId =  createTab("API New Private Tab", false,false,"Order",ttm_userId);
         Response response = app.rest().deleteTab(ttm_userId, generalTabId + "123");
         response
                 .then().log().all().statusCode(405)
@@ -341,7 +293,7 @@ public class TabTest extends TestBase {
     //DELETE - Delete a tab with UnAuthorised User
     @Test
     public void testDeleteTabUnAuth() throws IOException {
-        createTab("API General Tab", false,false,"Order",ttm_userId);
+         generalTabId =  createTab("API New Private Tab", false,false,"Order",ttm_userId);
         Response response = app.rest().deleteTab(null, generalTabId);
         response
                 .then().log().all().statusCode(400)
@@ -351,7 +303,7 @@ public class TabTest extends TestBase {
     //DELETE - Delete a tab with UnAuthorised User
     @Test
     public void testDeleteTabInvalidAuth() throws IOException {
-        createTab("API General Tab", false,false,"Order",ttm_userId);
+        generalTabId = createTab("API New Private Tab", false,false,"Order",ttm_userId);
         Response response = app.rest().deleteTab(ttm_userId + "123", generalTabId);
         response
                 .then().log().all().statusCode(403)
@@ -361,10 +313,10 @@ public class TabTest extends TestBase {
     //DELETE - Delete a tab which was already deleted
     @Test
     public void testAlreadyDeletedTab() throws IOException {
-        testCreateCustomTab();
-        app.rest().deleteTab(ttm_userId, customTab)
+        generalTabId = createTab("API New Private Tab", false,false,"Order",ttm_userId);
+        app.rest().deleteTab(ttm_userId, generalTabId)
                 .then().log().ifError().statusCode(200).assertThat().body(equalTo("OK"));
-        Response response = app.rest().deleteTab(ttm_userId, customTab);
+        Response response = app.rest().deleteTab(ttm_userId, generalTabId);
         response
                 .then().log().all().statusCode(404)
                 .assertThat().body(equalTo("The requested resource could not be found but may be available again in the future."));
@@ -397,7 +349,7 @@ public class TabTest extends TestBase {
     //User = TTM; Type= Order; change public False -> True
     @Test
     public void testUpdateTTMAccess() throws IOException{
-        createTab("API General Tab", false,false,"Order",ttm_userId);
+        generalTabId =  createTab("API New Private Tab", false,false,"Order",ttm_userId);
             NewTab body = new NewTab().setTabId(generalTabId).setBusinessUnitId(ingestId).setName("API TTM Access Edit")
                     .setPublic(true).setDefault(false).setTabType("Order");
             Response response = app.rest().updateTab(ttm_userId, body);
@@ -409,7 +361,7 @@ public class TabTest extends TestBase {
     //User = BTM; Type = Send; change public false -> true
     @Test
     public void testUpdateBTMAccess() throws IOException {
-        createTab("API General Tab", false,false,"OrderItemSend",btm_userId);
+        generalTabId = createTab("API New Private Tab", false,false,"OrderItemSend",btm_userId);
         NewTab body = new NewTab().setTabId(generalTabId).setBusinessUnitId(broadcast_buId).setName("API BTM Access Edit")
                 .setPublic(true).setDefault(false).setTabType("OrderItemSend");
         Response response = app.rest().updateTab(btm_userId, body);
@@ -421,7 +373,7 @@ public class TabTest extends TestBase {
     //User = BTM Hub; Type = Clock; change public true -> false
     @Test
     public void testUpdateBTMHubAccess() throws IOException{
-        createTab("API General Tab", true,false,"OrderItemClock",btm_hub_userId);
+        generalTabId = createTab("API General Tab", true,false,"OrderItemClock",btm_hub_userId);
         NewTab  body = new NewTab().setTabId(generalTabId).setCreateByUserId(btm_hub_userId).setName("API HUB Access Edit")
                 .setPublic(false).setDefault(false).setTabType("OrderItemClock");
         Response response = app.rest().updateTab(btm_hub_userId, body);
@@ -435,7 +387,7 @@ public class TabTest extends TestBase {
     //User = TTM; Type = Order; change xUserId TTM -> TTM1
     @Test
     public void testUpdateTTMOrder() throws IOException {
-        createTab("API General Tab", true,false,"Order",ttm_userId);
+        generalTabId = createTab("API General Tab", true,false,"Order",ttm_userId);
         NewTab body = new NewTab().setTabId(generalTabId).setBusinessUnitId(ingestId).setName("API TTM & TTM1 Order Edit")
                 .setPublic(true).setDefault(false).setTabType("Order");
         Response response = app.rest().updateTab(ttm1_userId,body);
@@ -450,7 +402,7 @@ public class TabTest extends TestBase {
     //User = TFM; change Type = Order -> Clock and name - Bug
     @Test(enabled = false)
     public void testUpdateTFMClock() throws IOException {
-        createTab("API General Tab", false,false,"Order",ttm_userId);
+        generalTabId =  createTab("API General Tab", false,false,"Order",ttm_userId);
         NewTab body = new NewTab().setTabId(generalTabId).setCreateByUserId(ttm_userId).setName("API TTM Clock Edit")
                 .setPublic(false).setDefault(false).setTabType("OrderItemClock");
         Response response = app.rest().updateTab(ttm_userId,body);
@@ -458,14 +410,12 @@ public class TabTest extends TestBase {
     }
 
 
-
-
     //PUT Tab  Combination scenario
     //User = BTMHub; Type = Clock; change Public = true ->False and name - Bug
 
     @Test(enabled = false)
     public void testUpdateBTMHubSend() throws IOException {
-        createTab("API General Tab", false,false,"OrderItemClock",btm_hub_userId);
+        generalTabId =  createTab("API General Tab", false,false,"OrderItemClock",btm_hub_userId);
         NewTab body = new NewTab().setTabId(generalTabId).setCreateByUserId(btm_hub_userId).setName("API BTM HUB Send Edit")
                 .setPublic(false).setDefault(false).setTabType("OrderItemSend");
         Response response = app.rest().updateTab(btm_hub_userId,body);
@@ -476,7 +426,7 @@ public class TabTest extends TestBase {
     //User = TTM; Type = Send; change Public = true ->False and name
     @Test
     public void testUpdateTTMSend() throws IOException {
-        createTab("API General Tab", false,true,"OrderItemSend",ttm_userId);
+        generalTabId = createTab("API General Tab", false,true,"OrderItemSend",ttm_userId);
         NewTab body = new NewTab().setTabId(generalTabId).setCreateByUserId(ttm_userId).setName("API TTM Send Edit")
                 .setPublic(false).setDefault(false).setTabType("OrderItemSend");
         Response response = app.rest().updateTab(ttm_userId,body);
@@ -487,7 +437,7 @@ public class TabTest extends TestBase {
     //Change User TTM -> Non Traffic User; Type = Order
     @Test
     public void testUpdateUser() throws IOException {
-        createTab("API General Tab", false,false,"Order",ttm_userId);
+        generalTabId = createTab("API General Tab", false,false,"Order",ttm_userId);
         NewTab body = new NewTab().setTabId(generalTabId).setCreateByUserId(ttm_userId).setName("API Update User Edit")
                 .setPublic(false).setDefault(false).setTabType("Order");
         Response response = app.rest().updateTab(non_traffic_userId,body);

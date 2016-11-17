@@ -120,8 +120,8 @@ public class RestHelper {
     }
 
     //PUT /api/traffic/v1/tab/user - Arrange tabs for the user
-    public Response arrangeTabs(@Nullable String xUserId, Object body) throws JsonProcessingException {
-        return sendPutRequest(xUserId, "/api/traffic/v1/tab/user",body);
+    public Response arrangeTabs(@Nullable String xUserId, String[] tabId) throws IOException {
+        return sendPutRequest(xUserId, "/api/traffic/v1/tab/user",tabId);
     }
 
 
